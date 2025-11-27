@@ -1,4 +1,4 @@
-// '`FabricKotlinMod`'/settings.gradle.kts
+// InventoryDelta/settings.gradle.kts
 
 pluginManagement {
     repositories {
@@ -8,4 +8,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "FabricKotlinMod"
+rootProject.name = "InventoryDelta"

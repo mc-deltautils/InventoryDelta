@@ -1,22 +1,37 @@
-// '`FabricKotlinMod`'/src/main/resources/fabric.mod.json
-
 {
   "schemaVersion": 1,
-  "id": "fkm",
+  "id": "inventorydelta",
   "version": "${mod_version}",
 
-  // Replace: Name, Description, Authors; with your info.
-  "name": "FabricKotlinMod",
-  "description": "Fabric Kotlin Template",
+  "name": "InventoryDelta",
+  "description": "InventoryDelta applies focused Deltas (e.g., CraftingSlotRefill Delta, InventoryStackMerge Delta) using a consistent naming approach for inventory transformations.",
   "authors": ["eikhren"],
 
   "environment": "*",
 
   "entrypoints": {
     "main": [
-      "example.FabricKotlinMod"
+      {
+        "adapter": "kotlin",
+        "value": "inventorydelta.InventoryDeltaMod"
+      }
+    ],
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "inventorydelta.client.InventoryDeltaClientMod"
+      }
+    ],
+    "modmenu": [
+      {
+        "adapter": "kotlin",
+        "value": "inventorydelta.ui.InventoryDeltaModMenuIntegration"
+      }
     ]
   },
+  "mixins": [
+    "inventorydelta.mixins.json"
+  ],
 
   "depends": {
     "fabricloader": ">=0.17.2",
