@@ -1,45 +1,33 @@
 # InventoryDelta
 
-InventoryDelta is a minimal Fabric Kotlin mod configured around the InventoryDelta naming guide for focused inventory transformations. It targets Minecraft 1.21.10 with Kotlin 2.2.21 and Loom 1.13-SNAPSHOT.
+Fabric + Kotlin mod that delivers focused “Delta” inventory tweaks using a consistent naming approach. Targets Minecraft **1.21.10** with Fabric Loader **0.18.1**, Fabric API **0.138.3+1.21.10**, Fabric Language Kotlin **1.13.7+kotlin.2.2.21**, and Loom **1.13-SNAPSHOT**.
 
-## Naming Approach
-- Deltas use `<Context><Target><Action>[Qualifier] Delta`.
-- Context options: Inventory, Crafting, Hotbar, Pickup, Transfer.
-- Target options: Slot, Grid, Stack, Item, Result.
-- Action options: Refill, Sync, Merge, Filter, Lock, Shift.
-- Qualifiers: Fast, Strict, Smart, Soft, Auto (optional).
-- Examples: `CraftingSlotRefill Delta`, `PickupStackMerge Delta`, `TransferSlotStackSync Delta`.
-- Full guidance lives in `inventorydelta_naming_schema.md` (treated as the naming guide).
+## What’s inside
+- **TransferSlotRefill Delta** — After a villager/wandering trader trade, refills the two input slots from your inventory while respecting manual placements and rapid trading.
+- **Settings UI** — Cloth Config screen with per-Delta toggles; available via Mod Menu and a client keybind (`K` by default, Inventory category).
+- **Config storage** — `config/inventorydelta.json` holds Delta toggles, saved automatically from the UI.
+- **Mixin shell + Kotlin logic** — Java mixin on `TradeOutputSlot#onTakeItem` delegates to Kotlin behavior for maintainability.
 
-## Requirements
-- JDK 21 in PATH.
-- Gradle wrapper (`./gradlew`) included here.
-- Minecraft 1.21.10 with Fabric Loader >=0.17.2, Fabric API 0.138.3+1.21.10, Fabric Language Kotlin 1.13.7+kotlin.2.2.21 (versions pinned in `build.gradle.kts`).
-- Cloth Config 20.0.149 (bundled) and Mod Menu 16.0.0-rc.1 if you want the in-game settings entry.
+## Naming style
+All features follow `<Context><Target><Action>[Qualifier] Delta` (e.g., `TransferSlotRefill Delta`). Full guide: `inventorydelta_naming_schema.md`.
 
-## Project Layout
-- `build.gradle.kts` — Loom + Kotlin plugins, dependencies, resource processing for `${mod_version}`.
-- `settings.gradle.kts` — root project name `InventoryDelta`.
-- `gradle.properties` — `mod_version` (default `v0.0-Alpha`) and Gradle toggles.
-- `src/main/kotlin/inventorydelta/InventoryDeltaMod.kt` — entrypoint logging that InventoryDelta loaded.
-- `src/main/resources/fabric.mod.json` — metadata (id `inventorydelta`, entrypoint, dependencies).
-- `src/main/resources/inventorydelta.mixins.json` — placeholder mixin config ready for future mixins.
-- `inventorydelta_naming_schema.md` — naming guide for Delta names.
+## Install
+1) Drop the built JAR into your Fabric `mods/` folder.  
+2) Ensure Fabric API is present. Cloth Config is bundled; Mod Menu is recommended for easy access to the settings button.
 
-## Working With Deltas
-- Use the naming approach when adding features (e.g., `InventoryStackMergeFast Delta` for a fast stack merge).
-- Keep public descriptions focused on final Delta names and behaviors.
-- Add new Context/Action tokens only when introducing genuinely new behaviors.
+## Build & dev
+- `./gradlew build` — produces a remapped JAR in `build/libs/`.
+- `./gradlew runClient` / `./gradlew runServer` — dev run configs.
 
-## Running & Building
-- `./gradlew runClient` — dev client with InventoryDelta on the classpath.
-- `./gradlew runServer` — dev server.
-- `./gradlew build` — builds the JAR into `build/libs/` using the version from `gradle.properties`.
+## Project layout (high level)
+- `src/main/kotlin/inventorydelta/InventoryDeltaMod.kt` — main entrypoint, loads config.
+- `src/main/kotlin/inventorydelta/client/InventoryDeltaClientMod.kt` — client keybind + settings screen open.
+- `src/main/kotlin/inventorydelta/ui/SettingsScreenFactory.kt` — Cloth Config screen.
+- `src/main/kotlin/inventorydelta/delta/transfer/TransferSlotRefillDelta.kt` — core logic for the trade refill Delta.
+- `src/main/resources/fabric.mod.json` — mod metadata and entrypoints.
+- `.codex/` — internal blueprints/receipts and naming guide reference.
 
-## Updating Versions
-- Update versions in `build.gradle.kts` together (Minecraft, Yarn, Fabric Loader/API, Fabric Language Kotlin).
-- Mirror minimums in `src/main/resources/fabric.mod.json` under `depends`.
-- Optional: clean `build/` and run `./gradlew --refresh-dependencies build`.
-
-## Distributing
-- Run `./gradlew build` and drop the resulting JAR into a Fabric-enabled `mods/` folder that matches the declared versions.
+## Contributing / adding Deltas
+- Follow the naming style and add a toggle in the config/UI for each new Delta.
+- Keep mixin shells minimal; delegate logic to Kotlin classes for clarity and testing.
+- Maintain vanilla-friendly behavior: avoid overwrites unless unavoidable.
