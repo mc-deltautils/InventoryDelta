@@ -4,7 +4,10 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "trade.TradeOutputSlotMixin",
-    "crafting.CraftingResultSlotMixin"
+    "crafting.CraftingResultSlotMixin",
+    "smelting.FurnaceScreenHandlerMixin",
+    "smelting.BlastFurnaceScreenHandlerMixin",
+    "smelting.SmokerScreenHandlerMixin"
   ],
   "client": [],
   "server": []

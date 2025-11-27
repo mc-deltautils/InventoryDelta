@@ -5,9 +5,10 @@ Fabric + Kotlin mod that delivers focused “Delta” inventory tweaks using a c
 ## What’s inside
 - **AutoTradeSlot Delta** — After a villager/wandering trader trade, refills the two input slots from your inventory while respecting manual placements and rapid trading.
 - **AutoCraftSlot Delta** — After a recipe has been crafted, refills the corresponding crafting recipe slots from your inventory while respecting manual placements and rapid crafting.
+- **AutoSmeltSlot Delta** — On opening a furnace, blast furnace, or smoker GUI, pulls your configured recipe and fuel items into the smelter slots using per-smelter item IDs and counts (with a definition screen to manage multiple valid recipe/fuel entries per smelter).
 - **Settings UI** — Cloth Config screen with per-Delta toggles; available via Mod Menu and a client keybind (`K` by default, Inventory category).
-- **Config storage** — `config/inventorydelta.json` holds Delta toggles, saved automatically from the UI.
-- **Mixin shell + Kotlin logic** — Java mixins on `TradeOutputSlot#onTakeItem` and `CraftingResultSlot#onTakeItem` delegate to Kotlin behavior for maintainability.
+- **Config storage** — `config/inventorydelta.json` holds Delta toggles and per-smelter item entries, saved automatically from the UI.
+- **Mixin shell + Kotlin logic** — Java mixins on `TradeOutputSlot#onTakeItem`, `CraftingResultSlot#onTakeItem`, and `AbstractFurnaceScreenHandler` delegate to Kotlin behavior for maintainability.
 
 ## Install
 1) Drop the built JAR into your Fabric `mods/` folder.  
@@ -19,6 +20,7 @@ Fabric + Kotlin mod that delivers focused “Delta” inventory tweaks using a c
 - `src/main/kotlin/inventorydelta/ui/SettingsScreenFactory.kt` — Cloth Config screen.
 - `src/main/kotlin/inventorydelta/delta/transfer/TransferSlotRefillDelta.kt` — core logic for the AutoTradeSlot Delta.
 - `src/main/kotlin/inventorydelta/delta/craft/AutoCraftSlotDelta.kt` — core logic for the AutoCraftSlot Delta.
+- `src/main/kotlin/inventorydelta/delta/smelt/AutoSmeltSlotDelta.kt` — core logic for the AutoSmeltSlot Delta.
 - `src/main/resources/fabric.mod.json` — mod metadata and entrypoints.
 - `.codex/` — internal blueprints/receipts and naming guide reference.
 
