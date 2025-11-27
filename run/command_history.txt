@@ -1,3 +1,0 @@
-/give Player289 minecraft:stick 81
-/give Player289 minecraft:stick 5184
-/give Player365 minecraft:stick 5184
