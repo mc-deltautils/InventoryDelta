@@ -1,0 +1,27 @@
+// '`FabricKotlinMod`'/src/main/resources/fabric.mod.json
+
+{
+  "schemaVersion": 1,
+  "id": "fkm",
+  "version": "${mod_version}",
+
+  // Replace: Name, Description, Authors; with your info.
+  "name": "FabricKotlinMod",
+  "description": "Fabric Kotlin Template",
+  "authors": ["eikhren"],
+
+  "environment": "*",
+
+  "entrypoints": {
+    "main": [
+      "example.FabricKotlinMod"
+    ]
+  },
+
+  "depends": {
+    "fabricloader": ">=0.17.2",
+    "fabric-api": "*",
+    "fabric-language-kotlin": ">=1.13.7+kotlin.2.2.21",
+    "minecraft": "1.21.10"
+  }
+}
