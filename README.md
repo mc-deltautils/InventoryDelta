@@ -1,6 +1,6 @@
 # InventoryDelta
 
-Fabric + Kotlin mod that delivers focused “Delta” inventory tweaks using a consistent naming approach. Targets Minecraft **1.21.10** with Fabric Loader **0.18.1**, Fabric API **0.138.3+1.21.10**, Fabric Language Kotlin **1.13.7+kotlin.2.2.21**, and Loom **1.13-SNAPSHOT**.
+Fabric + Kotlin mod that delivers focused “Delta” inventory tweaks using a consistent naming approach.
 
 ## What’s inside
 - **AutoTradeSlot Delta** — After a villager/wandering trader trade, refills the two input slots from your inventory while respecting manual placements and rapid trading.
@@ -9,16 +9,9 @@ Fabric + Kotlin mod that delivers focused “Delta” inventory tweaks using a c
 - **Config storage** — `config/inventorydelta.json` holds Delta toggles, saved automatically from the UI.
 - **Mixin shell + Kotlin logic** — Java mixins on `TradeOutputSlot#onTakeItem` and `CraftingResultSlot#onTakeItem` delegate to Kotlin behavior for maintainability.
 
-## Naming style
-All features follow `<Context><Target><Action>[Qualifier] Delta` (e.g., `AutoCraftSlot Delta`). Full guide: `inventorydelta_naming_schema.md`.
-
 ## Install
 1) Drop the built JAR into your Fabric `mods/` folder.  
 2) Ensure Fabric API is present. Cloth Config is bundled; Mod Menu is recommended for easy access to the settings button.
-
-## Build & dev
-- `./gradlew build` — produces a remapped JAR in `build/libs/`.
-- `./gradlew runClient` / `./gradlew runServer` — dev run configs.
 
 ## Project layout (high level)
 - `src/main/kotlin/inventorydelta/InventoryDeltaMod.kt` — main entrypoint, loads config.
