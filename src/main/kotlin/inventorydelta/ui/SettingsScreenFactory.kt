@@ -31,6 +31,20 @@ object SettingsScreenFactory {
                 .build()
         )
 
+        deltas.addEntry(
+            entryBuilder
+                .startBooleanToggle(
+                    Text.literal(DeltaId.AutoCraftSlot.label),
+                    InventoryDeltaConfig.isEnabled(DeltaId.AutoCraftSlot)
+                )
+                .setDefaultValue(true)
+                .setTooltip(Text.literal(DeltaId.AutoCraftSlot.description))
+                .setSaveConsumer { enabled ->
+                    InventoryDeltaConfig.setEnabled(DeltaId.AutoCraftSlot, enabled)
+                }
+                .build()
+        )
+
         return builder.build()
     }
 }

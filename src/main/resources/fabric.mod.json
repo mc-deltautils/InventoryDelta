@@ -4,7 +4,7 @@
   "version": "${mod_version}",
 
   "name": "InventoryDelta",
-  "description": "InventoryDelta applies focused Deltas (e.g., CraftingSlotRefill Delta, InventoryStackMerge Delta) using a consistent naming approach for inventory transformations.",
+  "description": "InventoryDelta applies focused Deltas (e.g., AutoCraftSlot Delta, AutoTradeSlot Delta) using a consistent naming approach for inventory transformations.",
   "authors": ["eikhren"],
 
   "environment": "*",

@@ -3,7 +3,8 @@
   "package": "inventorydelta.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "trade.TradeOutputSlotMixin"
+    "trade.TradeOutputSlotMixin",
+    "crafting.CraftingResultSlotMixin"
   ],
   "client": [],
   "server": []

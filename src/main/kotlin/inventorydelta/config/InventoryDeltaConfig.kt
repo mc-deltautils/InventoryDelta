@@ -1,6 +1,7 @@
 package inventorydelta.config
 
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import inventorydelta.InventoryDeltaMod
 import net.fabricmc.loader.api.FabricLoader
 import java.io.IOException
@@ -21,7 +22,9 @@ object InventoryDeltaConfig {
             Files.createDirectories(path.parent)
             if (Files.exists(path)) {
                 Files.newBufferedReader(path).use { reader ->
-                    settings = gson.fromJson(reader, DeltaSettings::class.java) ?: DeltaSettings()
+                    val json = gson.fromJson(reader, JsonObject::class.java)
+                    val parsed = json?.let { gson.fromJson(it, DeltaSettings::class.java) }
+                    settings = mergeWithDefaults(parsed, json)
                 }
             } else {
                 save()
@@ -44,25 +47,43 @@ object InventoryDeltaConfig {
     }
 
     fun isEnabled(id: DeltaId): Boolean = when (id) {
+        DeltaId.AutoCraftSlot -> settings.autoCraftSlot
         DeltaId.TransferSlotRefill -> settings.transferSlotRefill
     }
 
     fun setEnabled(id: DeltaId, enabled: Boolean) {
         settings = when (id) {
+            DeltaId.AutoCraftSlot -> settings.copy(autoCraftSlot = enabled)
             DeltaId.TransferSlotRefill -> settings.copy(transferSlotRefill = enabled)
         }
         save()
     }
 }
 
+private fun mergeWithDefaults(parsed: DeltaSettings?, json: JsonObject?): DeltaSettings {
+    val defaults = DeltaSettings()
+    return DeltaSettings(
+        transferSlotRefill = json?.takeIf { it.has("transferSlotRefill") }?.let { parsed?.transferSlotRefill }
+            ?: defaults.transferSlotRefill,
+        autoCraftSlot = json?.takeIf { it.has("autoCraftSlot") }?.let { parsed?.autoCraftSlot }
+            ?: defaults.autoCraftSlot
+    )
+}
+
 data class DeltaSettings(
-    val transferSlotRefill: Boolean = true
+    val transferSlotRefill: Boolean = true,
+    val autoCraftSlot: Boolean = true
 )
 
 enum class DeltaId(val key: String, val label: String, val description: String) {
     TransferSlotRefill(
         key = "transfer_slot_refill",
-        label = "TransferSlotRefill Delta",
+        label = "AutoTradeSlot Delta",
         description = "Refills villager trade input slots after each trade when matching items are available."
+    ),
+    AutoCraftSlot(
+        key = "auto_craft_slot",
+        label = "AutoCraftSlot Delta",
+        description = "After a recipe has been crafted, refills the corresponding crafting recipe slots from your inventory while respecting manual placements and rapid crafting."
     )
 }
