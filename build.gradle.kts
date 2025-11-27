@@ -11,7 +11,6 @@ val modVersion = project.property("mod_version") as String
 repositories {
     mavenCentral()
     maven("https://maven.fabricmc.net/")
-    maven("https://maven.architectury.dev/")
     maven("https://maven.shedaniel.me/")
     maven("https://maven.terraformersmc.com/releases/")
 }
@@ -27,9 +26,6 @@ dependencies {
 
     // Fabric Language Kotlin (latest, tied to Kotlin 2.2.21)
     modImplementation("net.fabricmc:fabric-language-kotlin:1.13.7+kotlin.2.2.21")
-
-    // Architectury API
-    modApi("dev.architectury:architectury-fabric:18.0.6")
 
     //Cloth Config API
     modApi("me.shedaniel.cloth:cloth-config-fabric:20.0.149")

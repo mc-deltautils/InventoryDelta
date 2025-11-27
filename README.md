@@ -15,6 +15,7 @@ InventoryDelta is a minimal Fabric Kotlin mod configured around the InventoryDel
 - JDK 21 in PATH.
 - Gradle wrapper (`./gradlew`) included here.
 - Minecraft 1.21.10 with Fabric Loader >=0.17.2, Fabric API 0.138.3+1.21.10, Fabric Language Kotlin 1.13.7+kotlin.2.2.21 (versions pinned in `build.gradle.kts`).
+- Cloth Config 20.0.149 (bundled) and Mod Menu 16.0.0-rc.1 if you want the in-game settings entry.
 
 ## Project Layout
 - `build.gradle.kts` — Loom + Kotlin plugins, dependencies, resource processing for `${mod_version}`.
