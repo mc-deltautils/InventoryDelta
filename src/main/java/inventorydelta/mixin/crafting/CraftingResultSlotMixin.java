@@ -33,12 +33,7 @@ abstract class CraftingResultSlotMixin extends net.minecraft.screen.slot.Slot {
 
     @Inject(method = "onTakeItem", at = @At("HEAD"))
     private void inventorydelta$cacheInputs(PlayerEntity player, ItemStack stack, CallbackInfo ci) {
-        int size = this.input.size();
-        DefaultedList<ItemStack> copy = DefaultedList.ofSize(size, ItemStack.EMPTY);
-        for (int i = 0; i < size; i++) {
-            copy.set(i, this.input.getStack(i).copy());
-        }
-        this.inventorydelta$inputSnapshot = copy;
+        this.inventorydelta$inputSnapshot = AutoCraftSlotDelta.INSTANCE.snapshotInputs(this.input);
     }
 
     @Inject(method = "onTakeItem", at = @At("TAIL"))

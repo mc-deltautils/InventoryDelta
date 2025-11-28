@@ -1,5 +1,6 @@
 package inventorydelta.delta.smelt
 
+import inventorydelta.client.ClientInventoryMutator
 import inventorydelta.config.DeltaId
 import inventorydelta.config.InventoryDeltaConfig
 import inventorydelta.config.SmeltItemEntry
@@ -16,39 +17,12 @@ object AutoSmeltSlotDelta {
     private const val RECIPE_SLOT = 0
     private const val FUEL_SLOT = 1
 
-    fun onOpened(player: PlayerEntity, furnaceInventory: Inventory) {
-        if (!InventoryDeltaConfig.isEnabled(DeltaId.AutoSmeltSlot)) return
-        if (player.entityWorld.isClient) return
-        if (furnaceInventory.size() <= FUEL_SLOT) return
+    fun onOpened(player: PlayerEntity, furnaceInventory: Inventory): Boolean {
+        if (!InventoryDeltaConfig.isEnabled(DeltaId.AutoSmeltSlot)) return false
+        if (!player.entityWorld.isClient) return false
+        if (furnaceInventory.size() <= FUEL_SLOT) return false
 
-        val blockEntityType = (furnaceInventory as? AbstractFurnaceBlockEntity)?.type
-        val profile = InventoryDeltaConfig.getSmeltProfile(blockEntityType)
-        val playerInventory = player.inventory
-
-        var changed = false
-
-        selectTemplate(profile.recipes, playerInventory)?.let { template ->
-            changed = fillSlot(
-                furnaceInventory,
-                RECIPE_SLOT,
-                template,
-                playerInventory
-            ) || changed
-        }
-
-        selectTemplate(profile.fuels, playerInventory)?.let { template ->
-            changed = fillSlot(
-                furnaceInventory,
-                FUEL_SLOT,
-                template,
-                playerInventory
-            ) || changed
-        }
-
-        if (changed) {
-            furnaceInventory.markDirty()
-            playerInventory.markDirty()
-        }
+        return refillClientSide(player, furnaceInventory)
     }
 
     private fun createTemplate(itemId: String, count: Int): ItemStack? {
@@ -78,56 +52,33 @@ object AutoSmeltSlotDelta {
         return Registries.ITEM.get(identifier)
     }
 
-    private fun fillSlot(
-        inventory: Inventory,
-        slotIndex: Int,
-        desired: ItemStack,
-        playerInventory: PlayerInventory
-    ): Boolean {
-        val current = inventory.getStack(slotIndex)
-        if (!current.isEmpty && !ItemStack.areItemsAndComponentsEqual(current, desired)) {
-            return false
+    private fun refillClientSide(player: PlayerEntity, furnaceInventory: Inventory): Boolean {
+        val blockEntityType = (furnaceInventory as? AbstractFurnaceBlockEntity)?.type
+        val profile = InventoryDeltaConfig.getSmeltProfile(blockEntityType)
+        var moved = false
+
+        selectTemplate(profile.recipes, player.inventory)?.let { template ->
+            moved = ClientInventoryMutator.moveFromInventory(
+                player = player,
+                targetInventory = furnaceInventory,
+                targetSlotIndex = RECIPE_SLOT,
+                template = template,
+                desiredCount = template.count,
+                allowQuickMove = true
+            ) || moved
         }
 
-        val desiredCount = desired.count
-        val currentCount = current.count
-        val needed = desiredCount - currentCount
-        if (needed <= 0) return false
-
-        val moved = pullFromPlayerInventory(playerInventory, desired, needed)
-        if (moved <= 0) return false
-
-        val updated = if (current.isEmpty) desired.copy() else current.copy()
-        val capped = (currentCount + moved).coerceAtMost(minOf(desired.maxCount, desiredCount))
-        updated.count = capped
-        inventory.setStack(slotIndex, updated)
-        return true
-    }
-
-    private fun pullFromPlayerInventory(
-        playerInventory: PlayerInventory,
-        template: ItemStack,
-        needed: Int
-    ): Int {
-        var remaining = needed
-
-        val mainStacks = playerInventory.mainStacks
-        for (slot in mainStacks.indices) {
-            if (remaining <= 0) break
-
-            val stack = mainStacks[slot]
-            if (!ItemStack.areItemsAndComponentsEqual(stack, template)) continue
-
-            val move = minOf(remaining, stack.count)
-            if (move <= 0) continue
-
-            stack.decrement(move)
-            if (stack.isEmpty) {
-                mainStacks[slot] = ItemStack.EMPTY
-            }
-            remaining -= move
+        selectTemplate(profile.fuels, player.inventory)?.let { template ->
+            moved = ClientInventoryMutator.moveFromInventory(
+                player = player,
+                targetInventory = furnaceInventory,
+                targetSlotIndex = FUEL_SLOT,
+                template = template,
+                desiredCount = template.count,
+                allowQuickMove = true
+            ) || moved
         }
 
-        return needed - remaining
+        return moved
     }
 }

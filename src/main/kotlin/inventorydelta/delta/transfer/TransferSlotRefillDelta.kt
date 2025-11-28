@@ -2,6 +2,8 @@ package inventorydelta.delta.transfer
 
 import inventorydelta.config.DeltaId
 import inventorydelta.config.InventoryDeltaConfig
+import inventorydelta.delta.ObservedSlot
+import inventorydelta.client.ClientInventoryMutator
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
@@ -21,9 +23,13 @@ object TransferSlotRefillDelta {
         tradeOffer: TradeOffer? = null
     ) {
         if (!InventoryDeltaConfig.isEnabled(DeltaId.TransferSlotRefill)) return
-        if (player.entityWorld.isClient) return
         if (merchant.customer != player) return
         if (player.currentScreenHandler !is MerchantScreenHandler) return
+
+        if (player.entityWorld.isClient) {
+            refillClientSide(merchantInventory, player, tradeOffer)
+            return
+        }
 
         val offer: TradeOffer = tradeOffer ?: merchantInventory.tradeOffer ?: return
 
@@ -50,12 +56,12 @@ object TransferSlotRefillDelta {
     ): Boolean {
         if (required.isEmpty) return false
 
-        val current = merchantInventory.getStack(slotIndex)
-        if (!current.isEmpty && !ItemStack.areItemsAndComponentsEqual(current, required)) {
+        val observed = ObservedSlot.capture(merchantInventory, slotIndex)
+        if (!observed.isCompatibleWith(required)) {
             return false
         }
 
-        val currentCount = current.count
+        val currentCount = observed.stack.count
         val desiredCount = required.count
         val needed = desiredCount - currentCount
         if (needed <= 0) return false
@@ -64,10 +70,10 @@ object TransferSlotRefillDelta {
         if (moved <= 0) return false
 
         val cappedCount = (currentCount + moved).coerceAtMost(minOf(required.maxCount, desiredCount))
-        val updated = if (current.isEmpty) required.copy() else current.copy()
+        val updated = if (observed.stack.isEmpty) required.copy() else observed.stack.copy()
         updated.count = cappedCount
-        merchantInventory.setStack(slotIndex, updated)
-        return true
+
+        return observed.applyIfUnchanged(merchantInventory, slotIndex, updated)
     }
 
     private fun pullFromPlayerInventory(
@@ -95,5 +101,35 @@ object TransferSlotRefillDelta {
         }
 
         return needed - remaining
+    }
+
+    private fun refillClientSide(
+        merchantInventory: MerchantInventory,
+        player: PlayerEntity,
+        tradeOffer: TradeOffer?
+    ) {
+        val offer: TradeOffer = tradeOffer ?: merchantInventory.tradeOffer ?: return
+        val firstBuy = offer.displayedFirstBuyItem
+        val secondBuy = offer.displayedSecondBuyItem
+
+        if (!firstBuy.isEmpty) {
+            ClientInventoryMutator.moveFromInventory(
+                player = player,
+                targetInventory = merchantInventory,
+                targetSlotIndex = FIRST_INPUT_SLOT,
+                template = firstBuy,
+                desiredCount = firstBuy.count
+            )
+        }
+
+        if (!secondBuy.isEmpty) {
+            ClientInventoryMutator.moveFromInventory(
+                player = player,
+                targetInventory = merchantInventory,
+                targetSlotIndex = SECOND_INPUT_SLOT,
+                template = secondBuy,
+                desiredCount = secondBuy.count
+            )
+        }
     }
 }

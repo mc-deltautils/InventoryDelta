@@ -2,16 +2,31 @@ package inventorydelta.delta.craft
 
 import inventorydelta.config.DeltaId
 import inventorydelta.config.InventoryDeltaConfig
+import inventorydelta.client.ClientInventoryMutator
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.RecipeInputInventory
 import net.minecraft.item.ItemStack
+import net.minecraft.util.collection.DefaultedList
 
 object AutoCraftSlotDelta {
+    fun snapshotInputs(craftingInventory: RecipeInputInventory): DefaultedList<ItemStack> {
+        val size = craftingInventory.size()
+        val copy = DefaultedList.ofSize(size, ItemStack.EMPTY)
+        for (slot in 0 until size) {
+            copy[slot] = craftingInventory.getStack(slot).copy()
+        }
+        return copy
+    }
+
     fun onCrafted(player: PlayerEntity, craftingInventory: RecipeInputInventory, preCraftStacks: List<ItemStack>) {
         if (!InventoryDeltaConfig.isEnabled(DeltaId.AutoCraftSlot)) return
-        if (player.entityWorld.isClient) return
         if (preCraftStacks.size != craftingInventory.size()) return
+
+        if (player.entityWorld.isClient) {
+            refillClientSide(player, craftingInventory, preCraftStacks)
+            return
+        }
 
         val playerInventory = player.inventory
         var changed = false
@@ -71,5 +86,34 @@ object AutoCraftSlotDelta {
         }
 
         return needed - remaining
+    }
+
+    private fun refillClientSide(
+        player: PlayerEntity,
+        craftingInventory: RecipeInputInventory,
+        preCraftStacks: List<ItemStack>
+    ) {
+        for (slot in preCraftStacks.indices) {
+            val template = preCraftStacks[slot]
+            if (template.isEmpty) continue
+
+            val current = craftingInventory.getStack(slot)
+            if (!current.isEmpty && !ItemStack.areItemsAndComponentsEqual(current, template)) {
+                continue
+            }
+
+            val desiredCount = template.count
+            val currentCount = current.count
+            val needed = desiredCount - currentCount
+            if (needed <= 0) continue
+
+            ClientInventoryMutator.moveFromInventory(
+                player = player,
+                targetInventory = craftingInventory,
+                targetSlotIndex = slot,
+                template = template,
+                desiredCount = desiredCount
+            )
+        }
     }
 }

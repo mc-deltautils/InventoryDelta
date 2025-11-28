@@ -24,6 +24,8 @@ object InventoryDeltaClientMod : ClientModInitializer {
             while (openSettings.wasPressed()) {
                 client.setScreen(SettingsScreenFactory.create(client.currentScreen))
             }
+
+            SmeltScreenRefillWatcher.onTick(client)
         }
     }
 }
